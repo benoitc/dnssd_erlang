@@ -87,7 +87,10 @@ For brevity, the alternative invocations of register are:
     dnssd:register(Name, Type, Port, Txt)
     dnssd:register(Name, Type, Port, Txt, Host, Domain)
 
-Wherein Txt is a TXT record data in either binary form (a sequence of `<<Size, String:Size/binary>>`), a list of atoms, strings or binaries or tuples of the form {Key,Value} where Key and Value are atoms, strings or binaries. Host and Domain allow for creating a proxy-registration of a service on another machine and limiting a registration to a specific domain.
+Wherein:
+* `Txt` is a TXT record data in either binary form (a sequence of `<<Size, String:Size/binary>>`), a list of atoms, strings or binaries or tuples of the form {Key,Value} where Key and Value are atoms, strings or binaries.
+* `Host` is the hostname of the machine running the service. Pass an empty string or binary for the local machine.
+* `Domain` is the domain to register the service within. Pass an empty string or binary for all domains.
 
 ### Enumerating Domains
 
@@ -106,4 +109,4 @@ Wherein Txt is a TXT record data in either binary form (a sequence of `<<Size, S
 
 ### Stopping Operations
 
-It's important to stop operations when no more results are needed to avoid generating needless network traffic. To stop an operation pass the Reference returned when you started the operation to dnssd:stop/1. Operations will also be stopped if your proccess exits.
+It's important to stop operations when no more results are needed to avoid generating needless network traffic. To stop an operation pass the Reference returned when you started the operation to dnssd:stop/1. Operations will also be stopped if your process exits.
