@@ -88,9 +88,10 @@ For brevity, the alternative invocations of register are:
     dnssd:register(Name, Type, Port, Txt, Host, Domain)
 
 Wherein:
-* `Txt` is a TXT record data in either binary form (a sequence of `<<Size, String:Size/binary>>`), a list of atoms, strings or binaries or tuples of the form {Key,Value} where Key and Value are atoms, strings or binaries.
-* `Host` is the hostname of the machine running the service. Pass an empty string or binary for the local machine.
-* `Domain` is the domain to register the service within. Pass an empty string or binary for all domains.
+
+ * `Txt` is a TXT record data in either binary form (a sequence of `<<Size, String:Size/binary>>`), a list of atoms, strings or binaries or tuples of the form {Key,Value} where Key and Value are atoms, strings or binaries.
+ * `Host` is the hostname of the machine running the service. Pass an empty string or binary for the local machine.
+ * `Domain` is the domain to register the service within. Pass an empty string or binary for all domains.
 
 ### Enumerating Domains
 
