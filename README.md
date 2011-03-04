@@ -3,7 +3,7 @@
 dnssd_erlang is an interface to Apple's Bonjour DNS Service Discovery implementation. Bonjour allows applications to browse, resolve and register network services via link-local multicast DNS on the local network and via unicast DNS over the internet. In the later case if the service is running behind a NAT gateway Bonjour will only advertise it if a port forward can be negotiated via NAT-PMP or uPNP (which is attempted automatically).
 
 ####Development Status
-The API and functionality provided aren't yet set in stone. If you use this or would like to, I'd like your [feedback](andrew.tj.id.au/email).
+The API and functionality provided aren't yet set in stone. If you use this or would like to, I'd like your [feedback](http://andrew.tj.id.au/email).
 
 ## Prerequisites
 
