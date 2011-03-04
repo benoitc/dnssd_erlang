@@ -2,6 +2,9 @@
 
 dnssd_erlang is an interface to Apple's Bonjour DNS Service Discovery implementation. Bonjour allows applications to browse, resolve and register network services via link-local multicast DNS on the local network and via unicast DNS over the internet. In the later case if the service is running behind a NAT gateway Bonjour will only advertise it if a port forward can be negotiated via NAT-PMP or uPNP (which is attempted automatically).
 
+####Development Status
+The API and functionality provided aren't yet set in stone. If you use this or would like to, I'd like your [feedback](andrew.tj.id.au/email).
+
 ## Prerequisites
 
 Apple Bonjour or compatible API with the appropriate development files available. If you are not running OS X or Linux with Avahi you will likely have to massage the build flags.
@@ -21,7 +24,7 @@ First start the application via dnssd:start/1 or application:start(dnssd).
     2> dnssd:browse("_http._tcp").
     {ok,#Ref<0.0.0.197>,[]}
 
-In the success case, all functions return a tuple of the form `{ok, Reference, InitialResults}`. Reference should be retrained to pass to dnssd:stop/1 when no further results are required. InitialResults will generally be empty unless another process has done the same operation and some results are already known.
+In the success case, all functions return a tuple of the form `{ok, Reference, InitialResults}`. Reference should be retained to pass to dnssd:stop/1 when no further results are required. InitialResults will generally be empty unless another process has done the same operation and some results are already known.
 
     3> flush().
     Shell got {dnssd,#Ref<0.0.0.197>,
@@ -32,7 +35,7 @@ In the success case, all functions return a tuple of the form `{ok, Reference, I
                      {browse,add,{<<"TIVO">>,<<"_http._tcp.">>,<<"local.">>}}}
     ok
 
-Subsequent results will be sent to the shell in tuples of the form `{dnssd, Reference, {Operation, Change, Result}}`.
+Subsequent results will be sent in tuples of the form `{dnssd, Reference, {Operation, Change, Result}}`.
 
     4> dnssd:browse(<<"_http._tcp">>, <<"dns-sd.org">>).
     {ok,#Ref<0.0.0.488>,[]}
