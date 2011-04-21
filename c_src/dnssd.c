@@ -18,6 +18,10 @@
 
    -------------------------------------------------------------------- */
 
+#if defined(_WIN32)
+#define __WIN32__
+#endif
+
 #include <erl_driver.h>
 #include <erl_interface.h>
 #include <string.h>
@@ -38,6 +42,9 @@ typedef struct _dnssd_drv_t {
   ErlDrvTermData term_browse;
   ErlDrvTermData term_resolve;
   ErlDrvTermData term_register;
+#ifdef __WIN32__
+  WSAEVENT event;
+#endif
 } dnssd_drv_t;
 
 /* Driver Callbacks */
@@ -133,13 +140,23 @@ static ErlDrvData start(ErlDrvPort port, char* cmd) {
 
 static void stop(ErlDrvData edd) {
   dnssd_drv_t* dd = (dnssd_drv_t*) edd;
+#ifdef __WIN32__
+  if (dd->event) {
+    driver_select(dd->erl_port, dd->event, DO_READ, 0);
+    WSAEventSelect(DNSServiceRefSockFD(dd->sd_ref), NULL, 0);
+  }
+  if (dd->sd_ref) {
+    DNSServiceRefDeallocate(dd->sd_ref);
+  }
+#else
   if (dd->sd_ref) {
     driver_select(dd->erl_port,
-		  DNSServiceRefSockFD(dd->sd_ref),
+		  (ErlDrvEvent) DNSServiceRefSockFD(dd->sd_ref),
 		  DO_READ,
 		  0);
     DNSServiceRefDeallocate(dd->sd_ref);
   }
+#endif
   driver_free(dd);
 }
 
@@ -150,11 +167,14 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
   DNSServiceErrorType err;
   char* out_atom_text;
   ei_term arg, name, type, domain, txt, host, hostport;
+  char *name_tmp, *type_tmp, *domain_tmp, *txt_tmp, *host_tmp;
 
   /* don't allow reuse */
   if (dd->sd_ref) return ERL_DRV_ERROR_BADARG;
 
   index = 0;
+  dd->sd_ref = NULL;
+
   ei_decode_version(buf, &index, &version);
   ei_decode_ei_term(buf, &index, &arg);
 
@@ -186,7 +206,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
     ei_decode_ei_term(buf, &index, &type);
     if (type.ei_type != ERL_BINARY_EXT) goto badarg;
     index += 5; // skip tag + 4 byte size
-    char* type_tmp = (char *) driver_alloc(type.size + 1);
+    type_tmp = (char*)driver_alloc(type.size + 1);
     memset(type_tmp, 0, type.size + 1);
     memcpy(type_tmp, buf + index, type.size);
     index += type.size;
@@ -197,7 +217,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
       goto badarg;
     }
     index += 5; // skip tag + 4 byte size
-    char* domain_tmp = (char *) driver_alloc(domain.size + 1);
+    domain_tmp = (char *) driver_alloc(domain.size + 1);
     memset(domain_tmp, 0, domain.size + 1);
     memcpy(domain_tmp, buf + index, domain.size);
     err = DNSServiceBrowse(&dd->sd_ref,
@@ -215,7 +235,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
     ei_decode_ei_term(buf, &index, &name);
     if (name.ei_type != ERL_BINARY_EXT) goto badarg;
     index += 5; // skip tag + 4 byte size
-    char* name_tmp = (char *) driver_alloc(name.size + 1);
+    name_tmp = (char *) driver_alloc(name.size + 1);
     memset(name_tmp, 0, name.size + 1);
     memcpy(name_tmp, buf + index, name.size);
     index += name.size;
@@ -226,7 +246,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
       goto badarg;
     }
     index += 5; // skip tag + 4 byte size
-    char* type_tmp = (char *) driver_alloc(type.size + 1);
+    type_tmp = (char *) driver_alloc(type.size + 1);
     memset(type_tmp, 0, type.size + 1);
     memcpy(type_tmp, buf + index, type.size);
     index += type.size;
@@ -238,7 +258,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
       goto badarg;
     }
     index += 5; // skip tag + 4 byte size
-    char* domain_tmp = (char *) driver_alloc(domain.size + 1);
+    domain_tmp = (char *) driver_alloc(domain.size + 1);
     memset(domain_tmp, 0, domain.size + 1);
     memcpy(domain_tmp, buf + index, domain.size);
     /* start op */
@@ -259,7 +279,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
     ei_decode_ei_term(buf, &index, &name);
     if (name.ei_type != ERL_BINARY_EXT) goto badarg;
     index += 5; // skip tag + 4 byte size
-    char* name_tmp = (char *) driver_alloc(name.size + 1);
+    name_tmp = (char *) driver_alloc(name.size + 1);
     memset(name_tmp, 0, name.size + 1);
     memcpy(name_tmp, buf + index, name.size);
     index += name.size;
@@ -270,7 +290,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
       goto badarg;
     }
     index += 5; // skip tag + 4 byte size
-    char* type_tmp = (char *) driver_alloc(type.size + 1);
+    type_tmp = (char *) driver_alloc(type.size + 1);
     memset(type_tmp, 0, type.size + 1);
     memcpy(type_tmp, buf + index, type.size);
     index += type.size;
@@ -282,7 +302,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
       goto badarg;
     }
     index += 5; // skip tag + 4 byte size
-    char* domain_tmp = (char *) driver_alloc(domain.size + 1);
+    domain_tmp = (char *) driver_alloc(domain.size + 1);
     memset(domain_tmp, 0, domain.size + 1);
     memcpy(domain_tmp, buf + index, domain.size);
     index += domain.size;
@@ -295,7 +315,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
       goto badarg;
     }
     index += 5; // skip tag + 4 byte size
-    char *host_tmp = (char *) driver_alloc(host.size + 1);
+    host_tmp = (char *) driver_alloc(host.size + 1);
     memset(host_tmp, 0, host.size + 1);
     memcpy(host_tmp, buf + index, host.size);
     index += host.size;
@@ -319,7 +339,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
       goto badarg;
     }
     index += 5; // skip tag + 4 byte size
-    char* txt_tmp = (char *) driver_alloc(txt.size + 1);
+    txt_tmp = (char *) driver_alloc(txt.size + 1);
     memset(txt_tmp, 0, txt.size + 1);
     memcpy(txt_tmp, buf + index, txt.size);
     /* start op */
@@ -347,10 +367,16 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
   out_len = 0;
   ei_encode_version(NULL, &out_len);
   if (err == kDNSServiceErr_NoError) {
+#ifdef __WIN32__
+    dd->event = WSACreateEvent();
+    WSAEventSelect(DNSServiceRefSockFD(dd->sd_ref), dd->event, FD_READ);
+    driver_select(dd->erl_port, dd->event, ERL_DRV_READ, 1);
+#else
     driver_select(dd->erl_port,
-		  (ErlDrvEvent) DNSServiceRefSockFD(dd->sd_ref),
+		  DNSServiceRefSockFD(dd->sd_ref),
 		  ERL_DRV_READ,
 		  1);
+#endif
     out_atom_text = "ok";
     ei_encode_atom(NULL, &out_len, out_atom_text);
     if(rlen < out_len) {
@@ -387,6 +413,9 @@ static void ready_io(ErlDrvData edd, ErlDrvEvent ev)
 {
   dnssd_drv_t* dd = (dnssd_drv_t*) edd;
   DNSServiceErrorType err;
+#ifdef __WIN32__
+  WSAResetEvent(dd->event);
+#endif
   err = DNSServiceProcessResult(dd->sd_ref);
   if (err != kDNSServiceErr_NoError) {
     ErlDrvTermData spec[] = {ERL_DRV_PORT, dd->term_port,
@@ -394,11 +423,6 @@ static void ready_io(ErlDrvData edd, ErlDrvEvent ev)
 			     ERL_DRV_INT, err,
 			     ERL_DRV_TUPLE, 3};
     driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
-  } else {
-    driver_select(dd->erl_port,
-		  (ErlDrvEvent) DNSServiceRefSockFD(dd->sd_ref),
-		  ERL_DRV_READ,
-		  1);
   }
 }
 
@@ -441,9 +465,9 @@ static void DNSSD_API BrowseReply(DNSServiceRef sd_ref,
 			     ERL_DRV_ATOM, dd->term_browse,
 			     ERL_DRV_INT, flags,
 			     ERL_DRV_INT, ifIndex,
-			     ERL_DRV_BUF2BINARY, name, strlen(name),
-			     ERL_DRV_BUF2BINARY, regtype, strlen(regtype),
-			     ERL_DRV_BUF2BINARY, domain, strlen(domain),
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) name, strlen(name),
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) regtype, strlen(regtype),
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) domain, strlen(domain),
 			     ERL_DRV_TUPLE, 5,
 			     ERL_DRV_TUPLE, 3};
     driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
@@ -469,10 +493,10 @@ static void DNSSD_API ResolveReply(DNSServiceRef sd_ref,
 			     ERL_DRV_ATOM, dd->term_resolve,
 			     ERL_DRV_INT, flags,
 			     ERL_DRV_INT, ifIndex,
-			     ERL_DRV_BUF2BINARY, fullname, strlen(fullname),
-			     ERL_DRV_BUF2BINARY, hosttarget, strlen(hosttarget),
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) fullname, strlen(fullname),
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) hosttarget, strlen(hosttarget),
 			     ERL_DRV_INT, ntohs(port),
-			     ERL_DRV_BUF2BINARY, txtRecord, txtLen,
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) txtRecord, txtLen,
 			     ERL_DRV_TUPLE, 6,
 			     ERL_DRV_TUPLE, 3};
     driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
@@ -488,26 +512,27 @@ static void DNSSD_API RegisterReply (DNSServiceRef sd_ref,
 				     void * context)
 {
   dnssd_drv_t* dd = (dnssd_drv_t*) context;
+  DNSServiceErrorType* err2 = (DNSServiceErrorType*) err;
   if (err != kDNSServiceErr_NoError) {
-    send_error(context, err);
+    send_error(context, err2);
   } else {
     ErlDrvTermData spec[] = {ERL_DRV_PORT, dd->term_port,
 			     ERL_DRV_ATOM, dd->term_register,
 			     ERL_DRV_INT, flags,
-			     ERL_DRV_BUF2BINARY, name, strlen(name),
-			     ERL_DRV_BUF2BINARY, regtype, strlen(regtype),
-			     ERL_DRV_BUF2BINARY, domain, strlen(domain),
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) name, strlen(name),
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) regtype, strlen(regtype),
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) domain, strlen(domain),
 			     ERL_DRV_TUPLE, 4,
 			     ERL_DRV_TUPLE, 3};
     driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
   }
 }
 
-static void send_error(ErlDrvData edd, signed int errno) {
+void send_error(ErlDrvData edd, signed int errno) {
   dnssd_drv_t* dd = (dnssd_drv_t*) edd;
   ErlDrvTermData spec[] = {ERL_DRV_PORT, dd->term_port,
 			   ERL_DRV_ATOM, dd->term_error,
-			   ERL_DRV_INT, errno,
+			   ERL_DRV_INT, (ErlDrvTermData) errno,
 			   ERL_DRV_TUPLE, 3};
   driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
 }
