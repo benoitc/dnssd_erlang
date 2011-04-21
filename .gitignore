@@ -1,7 +1,12 @@
 *.o
 *.so
 *.app
+*.dll
+*.exp
+*.lib
+*.obj
 *.beam
 *.bea#
+.DS_Store
 deps/
 .eunit/
