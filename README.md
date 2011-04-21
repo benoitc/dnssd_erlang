@@ -96,11 +96,12 @@ ok
 The minimum arguments needed to register a service are the service type and port. If no service name is supplied, the machines name is used (in the example above, that's `<<"atj-mbp">>`).
 
 For brevity, the alternative invocations of register are:
+
 ``` erlang
-dnssd:register(Name, Type, Port)
-dnssd:register(Type, Port, Txt)
-dnssd:register(Name, Type, Port, Txt)
-dnssd:register(Name, Type, Port, Txt, Host, Domain)
+dnssd:register(Name, Type, Port).
+dnssd:register(Type, Port, Txt).
+dnssd:register(Name, Type, Port, Txt).
+dnssd:register(Name, Type, Port, Txt, Host, Domain).
 ```
 Wherein:
 
