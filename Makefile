@@ -1,14 +1,11 @@
 .PHONY: all doc clean test
 
-all: deps compile
+all: compile
 
 compile:
 	@./rebar compile
 
-deps:
-	@./rebar get-deps
-
-doc:	
+doc:
 	@./rebar doc skip_deps=true
 
 clean:
