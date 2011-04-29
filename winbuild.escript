@@ -2,7 +2,10 @@
 main([]) ->
     NoCl = os:find_executable("cl.exe") =:= false,
     NoBonjourSDK = os:getenv("BONJOUR_SDK_HOME") =:= false,
-    if NoCl ->
+    OnUnix = element(1, os:type()) =:= unix,
+    if OnUnix ->
+	    erlang:halt(0);
+       NoCl ->
 	    io:fwrite("cl.exe not found.~n"),
 	    erlang:halt(1);
        NoBonjourSDK ->

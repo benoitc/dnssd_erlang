@@ -2,16 +2,27 @@
 
 dnssd_erlang is an interface to Apple's Bonjour DNS Service Discovery implementation. Bonjour allows applications to browse, resolve and register network services via link-local multicast DNS on the local network and via unicast DNS over the internet. In the later case if the service is running behind a NAT gateway Bonjour will only advertise it if a port forward can be negotiated via NAT-PMP or uPNP (which is attempted automatically).
 
-####Development Status
-The API and functionality provided aren't yet set in stone. If you use this or would like to, I'd like your [feedback](http://andrew.tj.id.au/email).
+### Development Status
 
-## Prerequisites
+The API and functionality provided aren't yet set in stone but will be locked down before release 1.0.
 
-Apple Bonjour or compatible API with the appropriate development files available. If you are not running OS X or Linux with Avahi you will likely have to massage the build flags.
+### Prerequisites
 
-If you are running Windows and have Visual Studio and the Bonjour SDK installed you should be able to build the project by opening a Visual Studio command prompt and running both `rebar.bat compile` and `winbuild.cmd`.
+Apple Bonjour or compatible API with the appropriate development files available.
 
-## Example use
+### Build Process
+
+`make compile` (or `./rebar compile`)
+
+If you are running Linux with Avahi you will need Avahi's Bonjour compatibility layer installed.
+
+If you are running Windows you will need Visual Studio and the Bonjour SDK installed. The project can then be built from a Visual Studio command prompt.
+
+### Feedback
+
+Please direct your [feedback here](http://andrew.tj.id.au/email).
+
+### Example use
 
 ``` erlang
 Eshell V5.8.2  (abort with ^G)
