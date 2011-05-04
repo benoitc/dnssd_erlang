@@ -75,30 +75,34 @@ Browsing can be limited to a specific domain by specifying the domain as argumen
 
 ``` erlang
 6> dnssd:resolve(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>). 
-{ok,#Ref<0.0.0.6628>}
+{ok,#Ref<0.0.0.161>}
 ```
 
 To resolve a service, supply it's name, registration type and domain to the resolve function.
 
 ``` erlang
 7> flush().
-Shell got {dnssd,#Ref<0.0.0.6628>,
-                 {resolve,add,
-                          {<<"\\032*\\032DNS\\032Service\\032Discovery._http._tcp.dns-sd.org.">>,
-                           <<"dns-sd.org.">>,80,
+Shell got {dnssd,#Ref<0.0.0.161>,
+                 {resolve,{<<"dns-sd.org.">>,80,
                            [<<"txtvers=1">>,<<"path=/">>]}}}
-Shell got {dnssd,#Ref<0.0.0.6628>,nomorecoming}
 ok
 ```
 
-Unlike the other operations the resolve function will not continue indefinitely. The atom `'nomorecoming'` indicates when the operation has stopped.
+Unlike the other operations results won't be tagged add or remove as the underlying DNSSD API does not provide this information. As resolve is generally called just prior to connecting to a service this shouldn't pose a problem.
+
+```
+8> dnssd:resolve_sync(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>).
+{ok,{<<"dns-sd.org.">>,80,[<<"txtvers=1">>,<<"path=/">>]}}
+```
+
+A synchronous wrapper to resolve is also provided. A timeout in milliseconds can also be specified by adding a fourth argument. The default is 5 seconds.
 
 ### Registering Services
 
 ``` erlang
-8> dnssd:register("_answer._udp",42).
+9> dnssd:register("_answer._udp",42).
 {ok,#Ref<0.0.0.10006>}
-9> flush().
+10> flush().
 Shell got {dnssd,#Ref<0.0.0.10006>,
                  {register,add,
                            {<<"atj-mbp">>,<<"_answer._udp.">>,<<"local.">>}}}
@@ -123,15 +127,15 @@ Wherein:
 ### Enumerating Domains
 
 ``` erlang
-10> dnssd:enumerate(browse).
+11> dnssd:enumerate(browse).
 {ok,#Ref<0.0.0.15448>}
-11> flush().
+12> flush().
 Shell got {dnssd,#Ref<0.0.0.15448>,{enumerate,add,<<"local.">>}}
 Shell got {dnssd,#Ref<0.0.0.15448>,{enumerate,add,<<"bonjour.tj.id.au.">>}}
 ok
-12> dnssd:enumerate(reg).
+13> dnssd:enumerate(reg).
 {ok,#Ref<0.0.0.15529>}
-13> flush().
+14> flush().
 Shell got {dnssd,#Ref<0.0.0.15529>,{enumerate,add,<<"local.">>}}
 Shell got {dnssd,#Ref<0.0.0.15529>,{enumerate,add,<<"bonjour.tj.id.au.">>}}
 ok

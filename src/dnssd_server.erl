@@ -174,7 +174,10 @@ handle_call({start, Op}, {ClientPid, _Tag} = Client,
 	    Reply = {ok, Ref},
 	    NewState = State#state{subs = NewSubs},
 	    gen_server:reply(Client, Reply),
-	    [ ClientPid ! {dnssd, Ref, {Type, add, Result}}
+	    [ ClientPid ! {dnssd, Ref, case Type of
+					   resolve -> {Type, Result};
+					   Type -> {Type, add, Result}
+				       end}
 	      || Result <- Results ],
 	    {noreply, NewState};
 	false ->
@@ -222,22 +225,6 @@ handle_cast(Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_info({dnssd_drv, DrvPid, nomorecoming},
-	    #state{subs = Subs, ops = Ops} = State) when is_pid(DrvPid) ->
-    case lists:keytake(DrvPid, #op.pid, Ops) of
-	{value, #op{id = OpId}, NewOps} ->
-	    {DefunctSubs, NewSubs} = lists:partition(
-				       fun(#sub{op_id = SubOpId}) ->
-					       SubOpId =:= OpId
-				       end, Subs),
-	    [ SubPid ! {dnssd, Ref, nomorecoming}
-	      || #sub{pid = SubPid, ref = Ref, op_id = SubOpId} <- DefunctSubs,
-		 SubOpId =:= OpId ],
-	    NewState = State#state{subs = NewSubs, ops = NewOps},
-	    {noreply, NewState};
-	_ ->
-	    {noreply, State}
-    end;
 handle_info({dnssd_drv, DrvPid, Message},
 	    #state{subs = Subs, ops = Ops} = State) when is_pid(DrvPid) ->
     case lists:keyfind(DrvPid, #op.pid, Ops) of

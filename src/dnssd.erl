@@ -31,7 +31,7 @@
 -export([start/0, stop/0, stop/1]).
 -export([enumerate/1]).
 -export([browse/1, browse/2]).
--export([resolve/3]).
+-export([resolve/3, resolve_sync/3, resolve_sync/4]).
 -export([register/2, register/3, register/4, register/6]).
 
 -ifdef(TEST).
@@ -110,6 +110,45 @@ resolve(Name, Type, Domain)
     resolve(iolist_to_binary(Name),
 	    iolist_to_binary(Type),
 	    iolist_to_binary(Domain)).
+
+%%--------------------------------------------------------------------
+%% @doc Returns the first result from resolving a service instance and
+%%      then cancels the operation. Times out after 5 seconds.
+%% @spec resolve_sync(Name, Type, Domain) ->
+%%       {ok, {Hostname, Port, Txt}} | {error, Error}
+%% @equiv resolve_sync(Name, Type, Domain, 5000)
+%%--------------------------------------------------------------------
+resolve_sync(Name, Type, Domain)
+  when ?IS_LIST_OR_BIN(Name), ?IS_LIST_OR_BIN(Type), ?IS_LIST_OR_BIN(Domain) ->
+    resolve_sync(Name, Type, Domain, 5000).
+
+%%--------------------------------------------------------------------
+%% @doc Returns the first result from resolving a service instance and
+%%      then cancels the operation. Times out after Timeout milliseconds.
+%% @spec resolve_sync(Name, Type, Domain, Timeout) ->
+%%      {ok, {Hostname, Port, Txt}} | {error, Error}
+%%--------------------------------------------------------------------
+resolve_sync(Name, Type, Domain, Timeout)
+  when ?IS_LIST_OR_BIN(Name), ?IS_LIST_OR_BIN(Type), ?IS_LIST_OR_BIN(Domain),
+       is_integer(Timeout) andalso Timeout > 0 ->
+    case resolve(Name, Type, Domain) of
+	{ok, Ref} ->
+	    receive
+		{dnssd, Ref, {resolve, Result}} ->
+		    ok = stop(Ref),
+		    ok = flush(Ref),
+		    {ok, Result};
+		{dnssd, Ref, crash} ->
+		    {error, crash}
+	    after
+		Timeout ->
+		    ok = stop(Ref),
+		    ok = flush(Ref),
+		    {error, timeout}
+	    end;
+	{error, Error} ->
+	    {error, Error}
+    end.
 
 %%--------------------------------------------------------------------
 %% @doc Register a service.
@@ -307,6 +346,11 @@ txt_pair_to_bin({Key, Value})
     %% character string is 255 chars max, "=" snags one
     <<Key/binary, $=, Value/binary>>;
 txt_pair_to_bin(_) -> throw(bad_txt).
+
+flush(Ref) when is_reference(Ref) ->
+    receive {dnssd, Ref, _} ->
+	    flush(Ref)
+    after 0 -> ok end.
 
 -ifdef(TEST).
 

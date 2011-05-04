@@ -277,15 +277,17 @@ handle_info({Port, browse, {Flags, _IfIndex, Name, Type, Domain}},
 		   false -> remove_result(Result, State)
 	       end,
     {noreply, NewState};
-handle_info({DrvPort, resolve, {Flags, _IfIndex, Fullname, Host, Port, Txt}},
+handle_info({DrvPort, resolve, {_Flags, _IfIndex, _Fullname, Host, Port, Txt}},
 	    #state{notify = Notify, port = DrvPort} = State) ->
     TxtStrings = decode_txt(Txt),
-    Result = {Fullname, Host, Port, TxtStrings},
-    NewState = add_result(Result, State),
-    case flags_morecoming(Flags) of
-	true -> {noreply, NewState};
-	false ->
-	    Notify ! {dnssd_drv, self(), nomorecoming},
+    Result = {Host, Port, TxtStrings},
+    NewResults = [Result],
+    case State#state.results of
+	NewResults ->
+	    {noreply, State};
+	_ ->
+	    NewState = State#state{results = NewResults},
+	    Notify ! {?MODULE, self(), {resolve, Result}},
 	    {noreply, NewState}
     end;
 handle_info({Port, register, {Flags, Name, Type, Domain}},
@@ -407,7 +409,6 @@ priv_dir() ->
     end.
 
 flags_add(Int) when is_integer(Int) -> 0 =/= Int band 16#2.
-flags_morecoming(Int) when is_integer(Int) -> 0 =/= Int band 16#1.
 
 decode_txt(Txt) when is_binary(Txt) ->
     [ String || <<Size, String:Size/binary>> <= Txt ].
