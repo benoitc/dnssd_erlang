@@ -29,6 +29,7 @@
 %% @end
 -module(dnssd).
 -export([start/0, stop/0, stop/1]).
+-export([results/1]).
 -export([enumerate/1]).
 -export([browse/1, browse/2]).
 -export([resolve/3, resolve_sync/3, resolve_sync/4]).
@@ -61,6 +62,14 @@ stop() -> application:stop(?APP_NAME).
 %% @end
 %%--------------------------------------------------------------------
 stop(Ref) when is_reference(Ref) -> dnssd_server:stop(Ref).
+
+%%--------------------------------------------------------------------
+%% @doc Retrieve the current results of an operation
+%% @spec results(Ref) -> {ok, Results} | {error, Error}
+%% @end
+%%--------------------------------------------------------------------
+results(Ref) when is_reference(Ref) ->
+    dnssd_server:results(Ref).
 
 %%--------------------------------------------------------------------
 %% @doc Enumerate browse or registration domains

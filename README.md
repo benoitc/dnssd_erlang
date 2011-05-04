@@ -144,3 +144,7 @@ ok
 ### Stopping Operations
 
 It's important to stop operations when no more results are needed to avoid generating needless network traffic. To stop an operation pass the Reference returned when you started the operation to dnssd:stop/1. Operations will also be stopped if your process exits.
+
+### Retrieving Results
+
+Results from a running operation can be retrieved by calling dnssd:results(Ref). For resolve operations this will only return the last result. For all other operations it will return all current results.

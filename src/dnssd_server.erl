@@ -25,7 +25,7 @@
 %% API
 -export([start_link/0]).
 
--export([stop/1, enumerate/1, browse/2, resolve/3, register/6]).
+-export([stop/1, enumerate/1, browse/2, resolve/3, register/6, results/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -90,6 +90,10 @@ register(Name, Type, Domain, Host, Port, Txt)
 when is_binary(Name), is_binary(Type), is_binary(Domain), is_binary(Host),
      is_integer(Port), is_binary(Txt) ->
     Req = {start, {register, Name, Type, Domain, Host, Port, Txt}},
+    gen_server:call(?SERVER, Req).
+
+results(Ref) when is_reference(Ref) ->
+    Req = {results, Ref},
     gen_server:call(?SERVER, Req).
 
 %%--------------------------------------------------------------------
@@ -195,6 +199,15 @@ handle_call({start, Op}, {ClientPid, _Tag} = Client,
 		    {reply, Reply, State}
 	    end
     end;
+handle_call({results, Ref}, _From, #state{subs = Subs, ops = Ops} = State) ->
+    Reply = case lists:keyfind(Ref, #sub.ref, Subs) of
+		#sub{op_id = OpId} ->
+		    #op{pid = OpPid} = lists:keyfind(OpId, #op.id, Ops),
+		    dnssd_drv:results(OpPid);
+		_ ->
+		    {error, unknown_ref}
+	    end,
+    {reply, Reply, State};
 handle_call(Request, _From, State) ->
     error_logger:info_msg(?MODULE_STRING " ~p ignoring call: ~p~n",
 			  [ self(), Request]),
