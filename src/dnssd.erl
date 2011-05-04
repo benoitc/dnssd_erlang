@@ -21,8 +21,7 @@
 %% This module is the main interface to the application.
 %%
 %% If successful, the enumerate, browse, resolve and register functions all
-%% return {ok, Ref, InitialResults}. InitialResults will be a list (usually
-%% empty), subsequent results will be sent to the process that started the
+%% return {ok, Ref}. Results will be sent to the process that started the
 %% operation via a message of the form {dnssd, Ref, Result}. To stop the
 %% operation pass Ref to stop/1. The operation will also be stopped if the
 %% calling process exists.
@@ -65,7 +64,7 @@ stop(Ref) when is_reference(Ref) -> dnssd_server:stop(Ref).
 
 %%--------------------------------------------------------------------
 %% @doc Enumerate browse or registration domains
-%% @spec enumerate(Type) -> {ok, Ref, InitialResults} | {error, Error}
+%% @spec enumerate(Type) -> {ok, Ref} | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
 enumerate(Type) when Type =:= reg orelse Type =:= browse ->
@@ -73,7 +72,7 @@ enumerate(Type) when Type =:= reg orelse Type =:= browse ->
 
 %%--------------------------------------------------------------------
 %% @doc Browse for services.
-%% @spec browse(Type) -> {ok, Ref, InitialResults} | {error, Error}
+%% @spec browse(Type) -> {ok, Ref} | {error, Error}
 %% @equiv browse(Type, <<>>)
 %% @end
 %%--------------------------------------------------------------------
@@ -81,7 +80,7 @@ browse(Type) -> browse(Type, <<>>).
 
 %%--------------------------------------------------------------------
 %% @doc Browse for services. If domain is empty, browse all domains.
-%% @spec browse(Type, Domain) -> {ok, Ref, InitialResults} | {error, Error}
+%% @spec browse(Type, Domain) -> {ok, Ref} | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
 browse(Type, Domain) when is_binary(Type), is_binary(Domain) ->
@@ -96,7 +95,7 @@ browse(Type, Domain) when ?IS_LIST_OR_BIN(Type), ?IS_LIST_OR_BIN(Domain) ->
 %%--------------------------------------------------------------------
 %% @doc Resolve a service instance.
 %% @spec resolve(Name, Type, Domain) ->
-%%           {ok, Ref, InitialResults} | {error, Error}
+%%           {ok, Ref} | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
 resolve(Name, Type, Domain)
@@ -114,7 +113,7 @@ resolve(Name, Type, Domain)
 
 %%--------------------------------------------------------------------
 %% @doc Register a service.
-%% @spec register(Type, Port) -> {ok, Ref, InitialResults} | {error, Error}
+%% @spec register(Type, Port) -> {ok, Ref} | {error, Error}
 %% @equiv register(Type, Port, <<>>)
 %% @end
 %%--------------------------------------------------------------------
@@ -124,7 +123,7 @@ register(Type, Port) -> register(<<>>, Type, Port).
 %% @doc Register a service.
 %%      If C is an integer, A is Name, B is Type and C is Port.
 %%      If B is an integer, A is Type, B is Port and C is Txt.
-%% @spec register(A, B, C) -> {ok, Ref, InitialResults} | {error, Error}
+%% @spec register(A, B, C) -> {ok, Ref} | {error, Error}
 %% @equiv register(Name, Type, Port, Txt)
 %% @end
 %%--------------------------------------------------------------------
@@ -136,7 +135,7 @@ register(Type, Port, Txt) when is_integer(Port) ->
 %%--------------------------------------------------------------------
 %% @doc Register a service.
 %% @spec register(Name, Type, Port, Txt) ->
-%%           {ok, Ref, InitialResults} | {error, Error}
+%%           {ok, Ref} | {error, Error}
 %% @equiv register(Name, Type, Port, Txt, <<>>, <<>>)
 %% @end
 %%--------------------------------------------------------------------
@@ -146,7 +145,7 @@ register(Name, Type, Port, Txt) ->
 %%--------------------------------------------------------------------
 %% @doc Register a service.
 %% @spec register(Name, Type, Port, Txt, Host, Domain) ->
-%%           {ok, Ref, InitialResults} | {error, Error}
+%%           {ok, Ref} | {error, Error}
 %% @equiv register(Name, Type, Port, Txt, <<>>, <<>>)
 %% @end
 %%--------------------------------------------------------------------

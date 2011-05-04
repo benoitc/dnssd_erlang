@@ -160,7 +160,7 @@ handle_call({stop, Ref}, _From, #state{subs = Subs, ops = Ops} = State)
 	    Reply = {error, unknown_ref},
 	    {reply, Reply, State}
     end;
-handle_call({start, Op}, {ClientPid, _Tag},
+handle_call({start, Op}, {ClientPid, _Tag} = Client,
 	    #state{subs = Subs, ops = Ops} = State) ->
     Type = element(1, Op),
     OpId = erlang:phash2(Op),
@@ -171,13 +171,16 @@ handle_call({start, Op}, {ClientPid, _Tag},
     case lists:keyfind(OpId, #op.id, Ops) of
 	#op{id = OpId, type = Type, pid = OpPid} ->
 	    {ok, Results} = dnssd_drv:results(OpPid),
-	    Reply = {ok, Ref, Results},
+	    Reply = {ok, Ref},
 	    NewState = State#state{subs = NewSubs},
-	    {reply, Reply, NewState};
+	    gen_server:reply(Client, Reply),
+	    [ ClientPid ! {dnssd, Ref, {Type, add, Result}}
+	      || Result <- Results ],
+	    {noreply, NewState};
 	false ->
 	    case dnssd_drv:start_link(Op) of
 		{ok, OpPid} ->
-		    Reply = {ok, Ref, []},
+		    Reply = {ok, Ref},
 		    NewOp = #op{id = OpId,
 				type = Type,
 				arg = Op,
