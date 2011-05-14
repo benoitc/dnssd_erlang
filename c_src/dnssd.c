@@ -170,7 +170,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
   char *name_tmp, *type_tmp, *domain_tmp, *txt_tmp, *host_tmp;
 
   /* don't allow reuse */
-  if (dd->sd_ref) return ERL_DRV_ERROR_BADARG;
+  if (dd->sd_ref) return -1;
 
   index = 0;
   dd->sd_ref = NULL;
@@ -373,7 +373,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
     driver_select(dd->erl_port, dd->event, ERL_DRV_READ, 1);
 #else
     driver_select(dd->erl_port,
-		  DNSServiceRefSockFD(dd->sd_ref),
+		  (ErlDrvEvent) DNSServiceRefSockFD(dd->sd_ref),
 		  ERL_DRV_READ,
 		  1);
 #endif
@@ -402,7 +402,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
     return out_len;
   }
  badarg:
-  return ERL_DRV_ERROR_BADARG;
+  return -1;
 }
 
 static void process(ErlDrvData handle, ErlIOVec *ev) {
@@ -440,7 +440,7 @@ static void DNSSD_API EnumReply(DNSServiceRef sd_ref,
     ErlDrvTermData spec[] = {ERL_DRV_PORT, dd->term_port,
 			     ERL_DRV_ATOM, dd->term_enumerate,
 			     ERL_DRV_INT, flags,
-			     ERL_DRV_BUF2BINARY, domain, strlen(domain),
+			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) domain, strlen(domain),
 			     ERL_DRV_TUPLE, 2,
 			     ERL_DRV_TUPLE, 3};
     driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
@@ -512,9 +512,8 @@ static void DNSSD_API RegisterReply (DNSServiceRef sd_ref,
 				     void * context)
 {
   dnssd_drv_t* dd = (dnssd_drv_t*) context;
-  DNSServiceErrorType* err2 = (DNSServiceErrorType*) err;
   if (err != kDNSServiceErr_NoError) {
-    send_error(context, err2);
+    send_error(context, err);
   } else {
     ErlDrvTermData spec[] = {ERL_DRV_PORT, dd->term_port,
 			     ERL_DRV_ATOM, dd->term_register,
