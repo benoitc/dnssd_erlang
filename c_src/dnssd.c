@@ -163,7 +163,7 @@ static void stop(ErlDrvData edd) {
 static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
 		char **rbuf, int rlen, unsigned int *flags) {
   dnssd_drv_t* dd = (dnssd_drv_t*) edd;
-  int version, out_len, index, rindex;
+  int version, out_len, index, rindex, local_only;
   DNSServiceErrorType err;
   char* out_atom_text;
   ei_term arg, name, type, domain, txt, host, hostport;
@@ -342,13 +342,13 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
     txt_tmp = (char *) driver_alloc(txt.size + 1);
     memset(txt_tmp, 0, txt.size + 1);
     memcpy(txt_tmp, buf + index, txt.size);
-    /* start op */
+    local_only = (0 == strcmp("localhost", host_tmp));
     err = DNSServiceRegister(&dd->sd_ref,
-			     kDNSServiceInterfaceIndexAny,
 			     0, // Flags
+			     local_only ? -1 : 0, // Interface: local / any
 			     name_tmp,
 			     type_tmp,
-			     domain_tmp,
+			     local_only ? "local" : domain_tmp,
 			     host_tmp,
 			     htons(hostport.value.i_val),
 			     txt.size,

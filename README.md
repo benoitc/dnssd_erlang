@@ -124,6 +124,10 @@ Wherein:
  * `Host` is the hostname of the machine running the service. Pass an empty string or binary for the local machine.
  * `Domain` is the domain to register the service within. Pass an empty string or binary for all domains.
 
+#### Local Registrations
+
+If `localhost` is passed as Host to dnssd:register/6 the service will be registered only in the local domain (regardless of the Domain argument) and only on the local machine.
+
 ### Enumerating Domains
 
 ``` erlang
