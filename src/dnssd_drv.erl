@@ -423,7 +423,14 @@ priv_dir() ->
 flags_add(Int) when is_integer(Int) -> 0 =/= Int band 16#2.
 
 decode_txt(Txt) when is_binary(Txt) ->
-    [ String || <<Size, String:Size/binary>> <= Txt ].
+    [ decode_txt_pair(String) || <<Size, String:Size/binary>> <= Txt ].
+
+decode_txt_pair(Txt) -> decode_txt_pair(<<>>, Txt).
+
+decode_txt_pair(String, <<>>) -> String;
+decode_txt_pair(Key, <<$=, Value/binary>>) -> {Key, Value};
+decode_txt_pair(Key, <<S, Rest/binary>>) ->
+    decode_txt_pair(<<Key/binary, S>>, Rest).
 
 error_msg(?ERR_NOERROR) -> "no error";
 error_msg(?ERR_UNKNOWN) -> "unknown";

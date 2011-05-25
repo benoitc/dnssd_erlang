@@ -98,7 +98,7 @@ binaries.
 
 ``` erlang
 6> dnssd:resolve(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>). 
-{ok,#Ref<0.0.0.161>}
+{ok,#Ref<0.0.0.20357>}
 ```
 
 To resolve a service, supply it's name, registration type and domain to the
@@ -106,18 +106,20 @@ resolve function.
 
 ``` erlang
 7> flush().
-Shell got {dnssd,#Ref<0.0.0.161>,
+Shell got {dnssd,#Ref<0.0.0.20357>,
                  {resolve,{<<"dns-sd.org.">>,80,
-                           [<<"txtvers=1">>,<<"path=/">>]}}}
+                           [{<<"txtvers">>,<<"1">>},{<<"path">>,<<"/">>}]}}}
 ok
 ```
 
 Unlike the other operations results won't be tagged add or remove as the
 underlying DNSSD API does not provide this information. As resolve is generally
 called just prior to connecting to a service this shouldn't pose a problem. The
-Result term for this operation isa tuple of the form
+Result term for this operation is a tuple of the form
 `{Hostname, Port, TxtStrings}` where Hostname is a binary, Port is an integer
-and TxtStrings is a list of binaries.
+and TxtStrings is a list containing either binaries or should a given string
+contain an equals sign, a `{Key, Value}` tuple wherein Key is everything up to
+the first equals sign and the remainder of the string is the value.
 
 ```
 8> dnssd:resolve_sync(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>).
