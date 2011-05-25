@@ -31,6 +31,11 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
+%% Silence Avahi warning
+-ifdef(AVAHI_COMPAT_NOWARN).
+-on_load(set_avahi_compat_nowarn/0).
+-endif.
+
 -record(state, {notify,
 		op,
 		arg,
@@ -80,7 +85,6 @@
 -define(ERR_NATPORTMAPPINGDISABLED    , -65565).
 -define(ERR_NOROUTER                  , -65566).
 -define(ERR_POLLINGMODE               , -65567).
-
 
 %%%===================================================================
 %%% API
@@ -332,6 +336,14 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+%% Silence Avahi warning
+
+-ifdef(AVAHI_COMPAT_NOWARN).
+set_avahi_compat_nowarn() ->
+    true = os:putenv("AVAHI_COMPAT_NOWARN", "1"),
+    ok.
+-endif.
 
 %% Result tracking
 
