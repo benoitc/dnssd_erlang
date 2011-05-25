@@ -8,7 +8,11 @@ The API and functionality provided aren't yet set in stone but will be locked do
 
 ### Prerequisites
 
-Apple Bonjour or compatible API with the appropriate development files available.
+Apple Bonjour or a compatible API such as [Avahi](http://avahi.org/) with it's compatibility layer along with the appropriate development files:
+
+* OS X - bundled
+* Windows - [Bonjour SDK](http://developer.apple.com/opensource/)
+* BSD/Linux - search for Avahi in your operating systems software manager
 
 ### Build Process
 
