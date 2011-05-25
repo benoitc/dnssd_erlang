@@ -326,8 +326,11 @@ string_len_match(<<Size, _:Size/binary, Rest/binary>>) ->
     string_len_match(Rest);
 string_len_match(_) -> false.
 
-txt_pair_to_bin(X) when not is_tuple(X) ->
-    txt_pair_to_bin({X, <<>>});
+txt_pair_to_bin(Bin) when is_binary(Bin) andalso byte_size(Bin) =< 255 -> Bin;
+txt_pair_to_bin(List) when is_list(List) ->
+    txt_pair_to_bin(iolist_to_binary(List));
+txt_pair_to_bin(Atom) when is_atom(Atom) ->
+    txt_pair_to_bin(atom_to_binary(Atom, latin1));
 txt_pair_to_bin({Atom, Value})
   when is_atom(Atom) ->
     Key = atom_to_binary(Atom, latin1),
@@ -344,14 +347,9 @@ txt_pair_to_bin({Key, List})
   when is_list(List) ->
     Value = iolist_to_binary(List),
     txt_pair_to_bin({Key, Value});
-txt_pair_to_bin({<<>>, <<>>}) ->
-    <<>>;
-txt_pair_to_bin({String, <<>>})
-  when is_binary(String) andalso byte_size(String) =< 255 ->
-    String;
 txt_pair_to_bin({Key, Value})
-  when is_binary(Key) andalso byte_size(Key) > 0 andalso
-       is_binary(Value) andalso (byte_size(Key) + byte_size(Value) < 255) ->
+  when is_binary(Key) andalso is_binary(Value) andalso
+       (byte_size(Key) + byte_size(Value) < 255) ->
     %% character string is 255 chars max, "=" snags one
     <<Key/binary, $=, Value/binary>>;
 txt_pair_to_bin(_) -> throw(bad_txt).
