@@ -55,7 +55,7 @@ Shell got {dnssd,#Ref<0.0.0.197>,
                  {browse,add,{<<"TIVO">>,<<"_http._tcp.">>,<<"local.">>}}}
 ok
 ```
-Results will be sent in tuples of the form `{dnssd, Reference, {Operation, Change, Result}}`.
+Results will be sent in tuples of the form `{dnssd, Reference, {Operation, Change, Result}}`. Reference will be the same reference which was used to start the operation. Operation will be one of the atoms `browse`, `resolve`, `register` or `enumerate`. Change will be the atom `add` or `remove` and the result will be an operation specific term. For the browse operation, it will be a tuple containing binaries of the form `{ServiceName, ServiceType, Domain}`.
 
 ``` erlang
 4> dnssd:browse(<<"_http._tcp">>, <<"dns-sd.org">>).
@@ -92,14 +92,14 @@ Shell got {dnssd,#Ref<0.0.0.161>,
 ok
 ```
 
-Unlike the other operations results won't be tagged add or remove as the underlying DNSSD API does not provide this information. As resolve is generally called just prior to connecting to a service this shouldn't pose a problem.
+Unlike the other operations results won't be tagged add or remove as the underlying DNSSD API does not provide this information. As resolve is generally called just prior to connecting to a service this shouldn't pose a problem. The Result term for this operation isa tuple of the form {Hostname, Port, TxtStrings} where Hostname is a binary, Port is an integer and TxtStrings is a list of binaries.
 
 ```
 8> dnssd:resolve_sync(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>).
 {ok,{<<"dns-sd.org.">>,80,[<<"txtvers=1">>,<<"path=/">>]}}
 ```
 
-A synchronous wrapper to resolve is also provided. A timeout in milliseconds can also be specified by adding a fourth argument. The default is 5 seconds.
+A synchronous wrapper to resolve is also provided. A timeout in milliseconds can also be specified by adding a fourth argument. The default timeout is 5 seconds. `{error, timeout}` will be returned should the operation timeout.
 
 ### Registering Services
 
@@ -112,7 +112,7 @@ Shell got {dnssd,#Ref<0.0.0.10006>,
                            {<<"atj-mbp">>,<<"_answer._udp.">>,<<"local.">>}}}
 ok
 ```
-The minimum arguments needed to register a service are the service type and port. If no service name is supplied, the machines name is used (in the example above, that's `<<"atj-mbp">>`).
+The minimum arguments needed to register a service are the service type and port. If no service name is supplied, the machines name is used (in the example above, that's `<<"atj-mbp">>`). The Result term for this operation is a tuple containing binaries of the form `{ServiceName, ServiceType, Domain}`.
 
 For brevity, the alternative invocations of register are:
 
@@ -127,6 +127,8 @@ Wherein:
  * `Txt` is a TXT record data in either binary form (a sequence of `<<Size, String:Size/binary>>`), a list of atoms, strings or binaries or tuples of the form {Key,Value} where Key and Value are atoms, strings or binaries.
  * `Host` is the hostname of the machine running the service. Pass an empty string or binary for the local machine.
  * `Domain` is the domain to register the service within. Pass an empty string or binary for all domains.
+
+'''Note:''' A service may be renamed if it conflicts with another service. Check the Results tuple to determine what name a service has been assigned.
 
 #### Local Registrations
 
@@ -148,6 +150,8 @@ Shell got {dnssd,#Ref<0.0.0.15529>,{enumerate,add,<<"local.">>}}
 Shell got {dnssd,#Ref<0.0.0.15529>,{enumerate,add,<<"bonjour.tj.id.au.">>}}
 ok
 ```
+
+The Result term for this operation is a binary containing the browse or registration domain.
 
 ### Stopping Operations
 
