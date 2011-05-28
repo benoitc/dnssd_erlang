@@ -20,11 +20,19 @@
 %% @doc
 %% This module is the main interface to the application.
 %%
-%% If successful, the enumerate, browse, resolve and register functions all
-%% return {ok, Ref}. Results will be sent to the process that started the
-%% operation via a message of the form {dnssd, Ref, Result}. To stop the
-%% operation pass Ref to stop/1. The operation will also be stopped if the
-%% calling process exists.
+%% The {@link enumerate/1. enumerate}, {@link browse/1. browse},
+%% {@link resolve/3. resolve} and {@link register/2. register} functions all
+%% return {@type {ok, op_ref()@}} or {@type {error, term()@}}.
+%% Results are then sent to the calling process in messages of the form
+%% {@type result_message()}. If the operation crashes a message of the form
+%% {@type {dnssd, op_ref(), crash@}} will be sent.
+%%
+%% The synchronous {@link resolve/3. resolve} wrapper
+%% {@link resolve_sync/3. resolve_sync} returns
+%% {@type {ok, resolve_sync_result()@}} or {@type {error, term()@}}.
+%%
+%% Operation are stopped by passing {@type op_ref()} to {@link stop/1}.
+%% Operations will also be stopped if the calling process exits.
 %%
 %% @end
 -module(dnssd).
@@ -42,56 +50,57 @@
 -define(APP_NAME, ?MODULE).
 -define(IS_LIST_OR_BIN(Term), (is_list(Term) orelse is_binary(Term))).
 
-%%--------------------------------------------------------------------
+-type domain_type() :: 'reg' | 'browse'.
+-type domain() :: binary() | iolist().
+-type name() :: binary() | iolist().
+-type type() :: binary() | iolist().
+-type hostname() :: binary() | iolist().
+-type ip_port() :: 0..65535.
+-type txt_strings() :: <<>> | <<_:8, _:_*8>> | [txt_string()].
+-type txt_string() :: {atom() | iolist(), atom(), iolist()} | iolist().
+-opaque op_ref() :: reference().
+-type result_message() :: {dnssd, op_ref(), result()}.
+-type result() :: enumerate_result() | browse_result() | resolve_result() |
+		  register_result().
+-type enumerate_result() :: {enumerate, add | remove, binary()}.
+-type browse_result() :: {browse, add | remove, {name(), type(), domain()}}.
+-type resolve_result() :: {resolve, {hostname(), ip_port(), txt_strings()}}.
+-type resolve_sync_result() :: {hostname(), ip_port(), txt_strings()}.
+-type register_result() :: {register, add | remove, {name(), type(), domain()}}.
+
+-export_type([domain_type/0, domain/0, name/0, type/0, hostname/0, ip_port/0,
+	      txt_strings/0, txt_string/0, result/0, result_message/0,
+	      enumerate_result/0, browse_result/0, resolve_result/0,
+	      register_result/0]).
+
 %% @doc Start the DNSSD application
-%% @spec start() -> ok | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+-spec start() -> 'ok' | {'error',_}.
 start() -> application:start(?APP_NAME).
 
-%%--------------------------------------------------------------------
 %% @doc Stop the DNSSD application
-%% @spec stop() -> ok | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+-spec stop() -> 'ok' | {'error',_}.
 stop() -> application:stop(?APP_NAME).
 
-%%--------------------------------------------------------------------
 %% @doc Stop a DNSSD operation
-%% @spec stop(Ref) -> ok | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+-spec stop(op_ref()) -> ok | {error, _}.
 stop(Ref) when is_reference(Ref) -> dnssd_server:stop(Ref).
 
-%%--------------------------------------------------------------------
 %% @doc Retrieve the current results of an operation
-%% @spec results(Ref) -> {ok, Results} | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+-spec results(op_ref()) -> {ok, [result()]} | {error, _}.
 results(Ref) when is_reference(Ref) ->
     dnssd_server:results(Ref).
 
-%%--------------------------------------------------------------------
 %% @doc Enumerate browse or registration domains
-%% @spec enumerate(Type) -> {ok, Ref} | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+-spec enumerate(domain_type()) -> {ok, op_ref()} | {error, _}.
 enumerate(Type) when Type =:= reg orelse Type =:= browse ->
     dnssd_server:enumerate(Type).
 
-%%--------------------------------------------------------------------
-%% @doc Browse for services.
-%% @spec browse(Type) -> {ok, Ref} | {error, Error}
 %% @equiv browse(Type, <<>>)
-%% @end
-%%--------------------------------------------------------------------
+-spec browse(type()) -> {ok, op_ref()} | {error, _}.
 browse(Type) -> browse(Type, <<>>).
 
-%%--------------------------------------------------------------------
 %% @doc Browse for services. If domain is empty, browse all domains.
-%% @spec browse(Type, Domain) -> {ok, Ref} | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+-spec browse(type(), domain()) -> {ok, op_ref()} | {error, _}.
 browse(Type, Domain) when is_binary(Type), is_binary(Domain) ->
     case ensure_safe_type(Type) of
 	Error when is_tuple(Error) -> Error;
@@ -101,12 +110,8 @@ browse(Type, Domain) when is_binary(Type), is_binary(Domain) ->
 browse(Type, Domain) when ?IS_LIST_OR_BIN(Type), ?IS_LIST_OR_BIN(Domain) ->
     browse(iolist_to_binary(Type), iolist_to_binary(Domain)).
 
-%%--------------------------------------------------------------------
 %% @doc Resolve a service instance.
-%% @spec resolve(Name, Type, Domain) ->
-%%           {ok, Ref} | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+-spec resolve(name(), type(), domain()) -> {ok, op_ref()} | {error, _}.
 resolve(Name, Type, Domain)
   when is_binary(Name), is_binary(Type), is_binary(Domain) ->
     case ensure_safe_type(Type) of
@@ -120,23 +125,17 @@ resolve(Name, Type, Domain)
 	    iolist_to_binary(Type),
 	    iolist_to_binary(Domain)).
 
-%%--------------------------------------------------------------------
-%% @doc Returns the first result from resolving a service instance and
-%%      then cancels the operation. Times out after 5 seconds.
-%% @spec resolve_sync(Name, Type, Domain) ->
-%%       {ok, {Hostname, Port, Txt}} | {error, Error}
 %% @equiv resolve_sync(Name, Type, Domain, 5000)
-%%--------------------------------------------------------------------
+-spec resolve_sync(name(), type(), domain()) ->
+			  {ok, resolve_sync_result()} | {error, _}.
 resolve_sync(Name, Type, Domain)
   when ?IS_LIST_OR_BIN(Name), ?IS_LIST_OR_BIN(Type), ?IS_LIST_OR_BIN(Domain) ->
     resolve_sync(Name, Type, Domain, 5000).
 
-%%--------------------------------------------------------------------
 %% @doc Returns the first result from resolving a service instance and
 %%      then cancels the operation. Times out after Timeout milliseconds.
-%% @spec resolve_sync(Name, Type, Domain, Timeout) ->
-%%      {ok, {Hostname, Port, Txt}} | {error, Error}
-%%--------------------------------------------------------------------
+-spec resolve_sync(name(), type(), domain(), pos_integer()) ->
+			  {ok, resolve_sync_result()} | {error, _}.
 resolve_sync(Name, Type, Domain, Timeout)
   when ?IS_LIST_OR_BIN(Name), ?IS_LIST_OR_BIN(Type), ?IS_LIST_OR_BIN(Domain),
        is_integer(Timeout) andalso Timeout > 0 ->
@@ -159,44 +158,33 @@ resolve_sync(Name, Type, Domain, Timeout)
 	    {error, Error}
     end.
 
-%%--------------------------------------------------------------------
-%% @doc Register a service.
-%% @spec register(Type, Port) -> {ok, Ref} | {error, Error}
+
 %% @equiv register(Type, Port, <<>>)
-%% @end
-%%--------------------------------------------------------------------
+-spec register(type(), ip_port()) -> {ok, op_ref()} | {error, _}.
 register(Type, Port) -> register(<<>>, Type, Port).
 
-%%--------------------------------------------------------------------
-%% @doc Register a service.
-%%      If C is an integer, A is Name, B is Type and C is Port.
-%%      If B is an integer, A is Type, B is Port and C is Txt.
-%% @spec register(A, B, C) -> {ok, Ref} | {error, Error}
+%% @doc edoc doesn't pickup the alternative invocation which is:
+%%      register(Type::iolist(), Port::integer(), Txt::list() | iolist())
 %% @equiv register(Name, Type, Port, Txt)
 %% @end
-%%--------------------------------------------------------------------
+-spec register(name(), type(), ip_port()) -> {ok, op_ref()} | {error, _};
+	      (type(), ip_port(), txt_strings()) ->
+		      {ok, op_ref()} | {error, _}.
 register(Name, Type, Port) when is_integer(Port) ->
     register(Name, Type, Port, <<>>);
 register(Type, Port, Txt) when is_integer(Port) ->
     register(<<>>, Type, Port, Txt).
 
-%%--------------------------------------------------------------------
-%% @doc Register a service.
-%% @spec register(Name, Type, Port, Txt) ->
-%%           {ok, Ref} | {error, Error}
 %% @equiv register(Name, Type, Port, Txt, <<>>, <<>>)
-%% @end
-%%--------------------------------------------------------------------
+-spec register(name(), type(), ip_port(), txt_strings()) ->
+		      {ok, op_ref()} | {error, _}.
 register(Name, Type, Port, Txt) ->
     register(Name, Type, Port, Txt, <<>>, <<>>).
 
-%%--------------------------------------------------------------------
-%% @doc Register a service.
-%% @spec register(Name, Type, Port, Txt, Host, Domain) ->
-%%           {ok, Ref} | {error, Error}
-%% @equiv register(Name, Type, Port, Txt, <<>>, <<>>)
-%% @end
-%%--------------------------------------------------------------------
+%% @doc Register a service. If localhost is passed as Host the
+%%      service will be registered only on the local machine.
+-spec register(name(), type(), ip_port(), txt_strings(), hostname(), domain())
+	      -> {ok, op_ref()} | {error, _}.
 %% Coerce types if we can...
 register(Name, Type, Port, Txt, Host, Domain)
   when is_list(Name) ->

@@ -8,5 +8,6 @@
 *.beam
 *.bea#
 .DS_Store
+doc/
 deps/
 .eunit/
