@@ -56,17 +56,17 @@
 -type type() :: binary() | iolist().
 -type hostname() :: binary() | iolist().
 -type ip_port() :: 0..65535.
--type txt_strings() :: <<>> | <<_:8, _:_*8>> | [txt_string()].
 -type txt_string() :: {atom() | iolist(), atom(), iolist()} | iolist().
+-type txt_strings() :: <<>> | <<_:8, _:_*8>> | [txt_string()].
 -opaque op_ref() :: reference().
--type result_message() :: {dnssd, op_ref(), result()}.
--type result() :: enumerate_result() | browse_result() | resolve_result() |
-		  register_result().
 -type enumerate_result() :: {enumerate, add | remove, binary()}.
 -type browse_result() :: {browse, add | remove, {name(), type(), domain()}}.
 -type resolve_result() :: {resolve, {hostname(), ip_port(), txt_strings()}}.
 -type resolve_sync_result() :: {hostname(), ip_port(), txt_strings()}.
 -type register_result() :: {register, add | remove, {name(), type(), domain()}}.
+-type result() :: enumerate_result() | browse_result() | resolve_result() |
+		  register_result().
+-type result_message() :: {dnssd, op_ref(), result()}.
 
 -export_type([domain_type/0, domain/0, name/0, type/0, hostname/0, ip_port/0,
 	      txt_strings/0, txt_string/0, result/0, result_message/0,
