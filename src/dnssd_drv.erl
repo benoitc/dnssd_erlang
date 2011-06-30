@@ -342,7 +342,11 @@ code_change(_OldVsn, State, _Extra) ->
 -ifdef(AVAHI_COMPAT_NOWARN).
 set_avahi_compat_nowarn() ->
     true = os:putenv("AVAHI_COMPAT_NOWARN", "1"),
-    ok.
+    Rel = erlang:system_info(otp_release),
+    case lists:prefix("R13", Rel) of
+	true when Rel =/= "R13B04" -> true;
+	_ -> ok
+    end.
 -endif.
 
 %% Result tracking
