@@ -59,7 +59,7 @@ static int call(ErlDrvData drv_data,
 		unsigned int *flags);
 static void process(ErlDrvData handle, ErlIOVec *ev);
 static void ready_io(ErlDrvData handle, ErlDrvEvent ev);
-static void send_error(ErlDrvData edd, signed int errno);
+static void send_error(ErlDrvData edd, DNSServiceErrorType err);
 
 /* DNSSD API Callbacks */
 static void DNSSD_API EnumReply(DNSServiceRef sd_ref,
@@ -151,7 +151,7 @@ static void stop(ErlDrvData edd) {
 #else
   if (dd->sd_ref) {
     driver_select(dd->erl_port,
-		  (ErlDrvEvent) DNSServiceRefSockFD(dd->sd_ref),
+		  (ErlDrvEvent)(size_t) DNSServiceRefSockFD(dd->sd_ref),
 		  DO_READ,
 		  0);
     DNSServiceRefDeallocate(dd->sd_ref);
@@ -373,7 +373,7 @@ static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
     driver_select(dd->erl_port, dd->event, ERL_DRV_READ, 1);
 #else
     driver_select(dd->erl_port,
-		  (ErlDrvEvent) DNSServiceRefSockFD(dd->sd_ref),
+		  (ErlDrvEvent)(size_t) DNSServiceRefSockFD(dd->sd_ref),
 		  ERL_DRV_READ,
 		  1);
 #endif
@@ -527,7 +527,7 @@ static void DNSSD_API RegisterReply (DNSServiceRef sd_ref,
   }
 }
 
-void send_error(ErlDrvData edd, signed int errno) {
+void send_error(ErlDrvData edd, DNSServiceErrorType err) {
   dnssd_drv_t* dd = (dnssd_drv_t*) edd;
   ErlDrvTermData spec[] = {ERL_DRV_PORT, dd->term_port,
 			   ERL_DRV_ATOM, dd->term_error,
