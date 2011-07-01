@@ -196,6 +196,7 @@ handle_call({start, Op}, {ClientPid, _Tag} = Client,
 		    NewState = State#state{subs = NewSubs, ops = NewOps},
 		    {reply, Reply, NewState};
 		{error, _Error} = Reply ->
+		    true = erlang:demonitor(MonRef),
 		    {reply, Reply, State}
 	    end
     end;
