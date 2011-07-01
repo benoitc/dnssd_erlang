@@ -194,11 +194,11 @@ init({Pid, Arg}) when is_pid(Pid) andalso is_tuple(Arg) ->
 			   arg = Arg,
 			   port = DrvPort},
 	    {ok, State};
-	{error, _} ->
+	{error, Error} ->
 	    ok = drv_close(DrvPort),
-	    {stop, Init}
+	    {stop, Error}
     end;
-init(_) -> {stop, {error, bad_op}}.
+init(_) -> {stop, bad_op}.
 
 %%--------------------------------------------------------------------
 %% @private
