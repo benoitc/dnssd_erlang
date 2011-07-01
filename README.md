@@ -26,7 +26,8 @@ compatibility layer along with the appropriate development files:
 `make compile` (or `./rebar compile`)
 
 If you are running Linux with Avahi you will need Avahi's Bonjour compatibility
-layer installed.
+layer installed. If `{error,-65537}` is returned when starting an operation
+it may be that avahi-daemon is not running.
 
 If you are running Windows you will need Visual Studio and the Bonjour SDK
 installed. The project can then be built from a Visual Studio command prompt.
