@@ -1,5 +1,5 @@
 language: erlang
-before_script: "sudo apt-get install -y avahi-daemon libavahi-compat-libdnssd-dev && sudo service avahi-daemon start"
+before_script: "sudo apt-get install -y avahi-daemon libavahi-compat-libdnssd-dev && sudo service dbus start && sudo service avahi-daemon start"
 otp_release:
    - R14B04
    - R14B03
