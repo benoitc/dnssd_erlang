@@ -32,7 +32,7 @@
 	 terminate/2, code_change/3]).
 
 %% Silence Avahi warning
--ifdef(AVAHI_COMPAT_NOWARN).
+-ifdef(AVAHI).
 -on_load(set_avahi_compat_nowarn/0).
 -endif.
 
@@ -339,7 +339,7 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% Silence Avahi warning
 
--ifdef(AVAHI_COMPAT_NOWARN).
+-ifdef(AVAHI).
 set_avahi_compat_nowarn() ->
     true = os:putenv("AVAHI_COMPAT_NOWARN", "1"),
     Rel = erlang:system_info(otp_release),
@@ -556,7 +556,7 @@ resolve_test_() ->
       ).
 
 register_test_() ->
-    Names = [<<"test">>, <<>>],
+    Names = [<<"test">>, <<?MODULE_STRING>>],
     Type = <<"_test._udp">>,
     Domains = [<<>>, <<"local">>],
     Hosts = [<<>>, <<"example.com">>],

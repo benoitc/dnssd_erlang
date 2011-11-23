@@ -219,6 +219,7 @@ register(_Name, _Type, Port, _Txt, _Host, _Domain)
   when not is_integer(Port) orelse (Port < 0 orelse Port > 16#FFFF) ->
     %% Setting port as 0 creates a placeholder
     {error, bad_port};
+
 register(Name, Type, Port, Txt, Host, Domain)
   when is_binary(Name),
        is_binary(Type),
@@ -226,6 +227,7 @@ register(Name, Type, Port, Txt, Host, Domain)
        (is_list(Txt) orelse is_binary(Txt)),
        is_binary(Host),
        is_binary(Domain) ->
+    SafeName = ensure_safe_name(Name),
     %% Try and avoid going all the way to the driver to find a bad arg
     case ensure_safe_txt(Txt) of
 	Error when is_tuple(Error) -> Error;
@@ -234,9 +236,18 @@ register(Name, Type, Port, Txt, Host, Domain)
 		Error when is_tuple(Error) -> Error;
 		SafeType ->
 		    dnssd_server:register(
-		      Name, SafeType, Domain, Host, Port, SafeTxt)
+		      SafeName, SafeType, Domain, Host, Port, SafeTxt)
 	    end
     end.
+
+-ifdef(AVAHI).
+ensure_safe_name(<<>>) ->
+    {ok, Hostname} = inet:gethostname(),
+    list_to_binary(Hostname);
+ensure_safe_name(Name) when is_binary(Name) -> Name.
+-else.
+ensure_safe_name(Name) when is_binary(Name) -> Name.
+-endif.
 
 ensure_safe_type(<<$_, S, _/binary>> = RegType)
   when is_binary(RegType), byte_size(RegType) > 6, S =/= $_ ->
