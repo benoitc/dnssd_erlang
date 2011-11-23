@@ -576,4 +576,26 @@ register_test_() ->
 	    Port <- Ports,
 	    Txt <- Txts ].
 
+parallel_test_() ->
+    ok = application:start(dnssd),
+    Name = fun(N) -> list_to_binary(integer_to_list(N)) end,
+    Type = fun(N) -> iolist_to_binary(["_test-", Name(N), "._udp"]) end,
+    Dom = <<"local">>,
+    Browse = fun(N) -> dnssd:browse(Type(N), Dom) end,
+    Register = fun(N) -> dnssd:register(Name(N), Type(N), N, [], "", Dom) end,
+    WaitForEvent = fun(Ref) ->
+			   receive {dnssd, Ref, _} -> ok
+			   after 10000 -> timeout end
+		   end,
+    Run = fun(N) ->
+		  {ok, BrowseRef} = Browse(N),
+		  {ok, RegRef} = Register(N),
+		  ok = WaitForEvent(RegRef),
+		  ok = WaitForEvent(BrowseRef),
+		  ok = dnssd:stop(BrowseRef),
+		  ok = dnssd:stop(RegRef),
+		  true
+	  end,
+    {inparallel, [ ?_test(?assert(Run(N))) || N <- lists:seq(1,20) ]}.
+
 -endif.
