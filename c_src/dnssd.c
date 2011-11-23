@@ -117,7 +117,7 @@ static ErlDrvEntry dnssd_driver_entry = {
     ERL_DRV_EXTENDED_MARKER,          /* ERL_DRV_EXTENDED_MARKER */
     ERL_DRV_EXTENDED_MAJOR_VERSION,   /* ERL_DRV_EXTENDED_MAJOR_VERSION */
     ERL_DRV_EXTENDED_MAJOR_VERSION,   /* ERL_DRV_EXTENDED_MINOR_VERSION */
-    ERL_DRV_FLAG_USE_PORT_LOCKING     /* ERL_DRV_FLAGs */
+    0                                 /* ERL_DRV_FLAGs */
 };
 
 DRIVER_INIT(dnssd_driver) {
