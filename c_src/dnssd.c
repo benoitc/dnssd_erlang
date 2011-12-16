@@ -27,6 +27,10 @@
 #include <string.h>
 #include <dns_sd.h>
 
+#if ERL_DRV_EXTENDED_MAJOR_VERSION < 2
+#define ErlDrvSSizeT int
+#endif
+
 #define DNSSD_CMD_ENUM     0
 #define DNSSD_CMD_BROWSE   1
 #define DNSSD_CMD_RESOLVE  2
@@ -50,13 +54,13 @@ typedef struct _dnssd_drv_t {
 /* Driver Callbacks */
 static ErlDrvData start(ErlDrvPort port, char* cmd);
 static void stop(ErlDrvData handle);
-static int call(ErlDrvData drv_data,
-		unsigned int command,
-		char *buf,
-		int len,
-		char **rbuf,
-		int rlen,
-		unsigned int *flags);
+static ErlDrvSSizeT call(ErlDrvData drv_data,
+			 unsigned int command,
+			 char *buf,
+			 ErlDrvSSizeT len,
+			 char **rbuf,
+			 ErlDrvSSizeT rlen,
+			 unsigned int *flags);
 static void process(ErlDrvData handle, ErlIOVec *ev);
 static void ready_io(ErlDrvData handle, ErlDrvEvent ev);
 static void send_error(ErlDrvData edd, DNSServiceErrorType err);
@@ -116,8 +120,10 @@ static ErlDrvEntry dnssd_driver_entry = {
     NULL,                             /* event */
     ERL_DRV_EXTENDED_MARKER,          /* ERL_DRV_EXTENDED_MARKER */
     ERL_DRV_EXTENDED_MAJOR_VERSION,   /* ERL_DRV_EXTENDED_MAJOR_VERSION */
-    ERL_DRV_EXTENDED_MAJOR_VERSION,   /* ERL_DRV_EXTENDED_MINOR_VERSION */
-    0                                 /* ERL_DRV_FLAGs */
+    ERL_DRV_EXTENDED_MINOR_VERSION,   /* ERL_DRV_EXTENDED_MINOR_VERSION */
+    0,                                /* ERL_DRV_FLAGs */
+    NULL,
+    NULL
 };
 
 DRIVER_INIT(dnssd_driver) {
@@ -160,8 +166,9 @@ static void stop(ErlDrvData edd) {
   driver_free(dd);
 }
 
-static int call(ErlDrvData edd, unsigned int cmd, char *buf, int len,
-		char **rbuf, int rlen, unsigned int *flags) {
+static ErlDrvSSizeT call(ErlDrvData edd, unsigned int cmd, char *buf,
+			 ErlDrvSSizeT len, char **rbuf, ErlDrvSSizeT rlen,
+			 unsigned int *flags) {
   dnssd_drv_t* dd = (dnssd_drv_t*) edd;
   int version, out_len, index, rindex, local_only;
   DNSServiceErrorType err;
