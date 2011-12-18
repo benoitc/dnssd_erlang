@@ -62,7 +62,6 @@ static ErlDrvSSizeT call(ErlDrvData drv_data,
 			 char **rbuf,
 			 ErlDrvSizeT rlen,
 			 unsigned int *flags);
-static void process(ErlDrvData handle, ErlIOVec *ev);
 static void ready_io(ErlDrvData handle, ErlDrvEvent ev);
 static void send_error(ErlDrvData edd, DNSServiceErrorType err);
 
@@ -114,7 +113,7 @@ static ErlDrvEntry dnssd_driver_entry = {
     NULL,                             /* handle */
     NULL,                             /* control */
     NULL,                             /* timeout */
-    process,                          /* process */
+    NULL,                             /* process */
     NULL,                             /* ready_async */
     NULL,                             /* flush */
     call,                             /* call */
@@ -411,10 +410,6 @@ static ErlDrvSSizeT call(ErlDrvData edd, unsigned int cmd, char *buf,
   }
  badarg:
   return -1;
-}
-
-static void process(ErlDrvData handle, ErlIOVec *ev) {
-  /* Todo: Update a registered service's text record */
 }
 
 static void ready_io(ErlDrvData edd, ErlDrvEvent ev)
