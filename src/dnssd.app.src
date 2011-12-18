@@ -1,7 +1,7 @@
 {application, dnssd,
  [
   {description, "Apple Bonjour DNS Service Discovery interface"},
-  {vsn, "0.7"},
+  {vsn, "0.8"},
   {registered, []},
   {applications, [
                   kernel,
