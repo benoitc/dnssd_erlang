@@ -28,6 +28,7 @@
 #include <dns_sd.h>
 
 #if ERL_DRV_EXTENDED_MAJOR_VERSION < 2
+#define ErlDrvSizeT int
 #define ErlDrvSSizeT int
 #endif
 
@@ -57,9 +58,9 @@ static void stop(ErlDrvData handle);
 static ErlDrvSSizeT call(ErlDrvData drv_data,
 			 unsigned int command,
 			 char *buf,
-			 ErlDrvSSizeT len,
+			 ErlDrvSizeT len,
 			 char **rbuf,
-			 ErlDrvSSizeT rlen,
+			 ErlDrvSizeT rlen,
 			 unsigned int *flags);
 static void process(ErlDrvData handle, ErlIOVec *ev);
 static void ready_io(ErlDrvData handle, ErlDrvEvent ev);
@@ -167,7 +168,7 @@ static void stop(ErlDrvData edd) {
 }
 
 static ErlDrvSSizeT call(ErlDrvData edd, unsigned int cmd, char *buf,
-			 ErlDrvSSizeT len, char **rbuf, ErlDrvSSizeT rlen,
+			 ErlDrvSizeT len, char **rbuf, ErlDrvSizeT rlen,
 			 unsigned int *flags) {
   dnssd_drv_t* dd = (dnssd_drv_t*) edd;
   int version, out_len, index, rindex, local_only;
