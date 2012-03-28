@@ -23,7 +23,11 @@ compatibility layer along with the appropriate development files:
 
 ### Build Process
 
-`make compile` (or `./rebar compile`)
+Build with [rebar](https://github.com/basho/rebar):
+
+* compile: `rebar compile`
+* test: `rebar eunit`
+* edoc: `rebar doc`
 
 If you are running Linux with Avahi you will need Avahi's Bonjour compatibility
 layer installed. If `{error,-65537}` is returned when starting an operation
