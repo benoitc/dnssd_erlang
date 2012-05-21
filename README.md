@@ -42,7 +42,7 @@ Please direct your [feedback here](http://andrew.tj.id.au/email).
 
 ### Example use
 
-``` erlang
+```
 Eshell V5.8.2  (abort with ^G)
 1> dnssd:start().
 ok
@@ -52,7 +52,7 @@ First start the application via dnssd:start/1 or application:start(dnssd).
 
 ### Browsing for Services
 
-``` erlang
+```
 2> dnssd:browse("_http._tcp").
 {ok,#Ref<0.0.0.197>}
 ```
@@ -61,7 +61,7 @@ In the success case, all functions return a tuple of the form `{ok, Reference}`.
 Reference should be retained to pass to dnssd:stop/1 when no further results are
 required.
 
-``` erlang
+```
 3> flush().
 Shell got {dnssd,#Ref<0.0.0.197>,
                  {browse,add,
@@ -79,7 +79,7 @@ atoms `browse`, `resolve`, `register` or `enumerate`. Change will be the atom
 browse operation, it will be a tuple containing binaries of the form
 `{ServiceName, ServiceType, Domain}`.
 
-``` erlang
+```
 4> dnssd:browse(<<"_http._tcp">>, <<"dns-sd.org">>).
 {ok,#Ref<0.0.0.488>}
 5> flush().
@@ -101,7 +101,7 @@ binaries.
 
 ### Resolving a Service Instance
 
-``` erlang
+```
 6> dnssd:resolve(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>). 
 {ok,#Ref<0.0.0.20357>}
 ```
@@ -109,7 +109,7 @@ binaries.
 To resolve a service, supply it's name, registration type and domain to the
 resolve function.
 
-``` erlang
+```
 7> flush().
 Shell got {dnssd,#Ref<0.0.0.20357>,
                  {resolve,{<<"dns-sd.org.">>,80,
@@ -137,7 +137,7 @@ also be specified by adding a fourth argument. The default timeout is 5 seconds.
 
 ### Registering Services
 
-``` erlang
+```
 9> dnssd:register("_answer._udp",42).
 {ok,#Ref<0.0.0.10006>}
 10> flush().
@@ -153,7 +153,7 @@ containing binaries of the form `{ServiceName, ServiceType, Domain}`.
 
 For brevity, the alternative invocations of register are:
 
-``` erlang
+```
 dnssd:register(Name, Type, Port).
 dnssd:register(Type, Port, Txt).
 dnssd:register(Name, Type, Port, Txt).
@@ -174,13 +174,13 @@ the Results tuple to determine what name a service has been assigned.
 
 #### Local Registrations
 
-If `localhost` is passed as Host to dnssd:register/6 the service will be
+If `localhost` is passed as Host to `dnssd:register/6` the service will be
 registered only in the local domain (regardless of the Domain argument) and only
 on the local machine.
 
 ### Enumerating Domains
 
-``` erlang
+```
 11> dnssd:enumerate(browse).
 {ok,#Ref<0.0.0.15448>}
 12> flush().
