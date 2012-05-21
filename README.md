@@ -42,35 +42,30 @@ Please direct your [feedback here](http://andrew.tj.id.au/email).
 
 ### Example use
 
-```
-Eshell V5.8.2  (abort with ^G)
-1> dnssd:start().
-ok
-```
+    Eshell V5.8.2  (abort with ^G)
+    1> dnssd:start().
+    ok
 
 First start the application via dnssd:start/1 or application:start(dnssd).
 
 ### Browsing for Services
 
-```
-2> dnssd:browse("_http._tcp").
-{ok,#Ref<0.0.0.197>}
-```
+    2> dnssd:browse("_http._tcp").
+    {ok,#Ref<0.0.0.197>}
 
 In the success case, all functions return a tuple of the form `{ok, Reference}`.
 Reference should be retained to pass to dnssd:stop/1 when no further results are
 required.
 
-```
-3> flush().
-Shell got {dnssd,#Ref<0.0.0.197>,
-                 {browse,add,
-                         {<<"dnsndnsweb">>,<<"_http._tcp.">>,
-                          <<"bonjour.tj.id.au.">>}}}
-Shell got {dnssd,#Ref<0.0.0.197>,
-                 {browse,add,{<<"TIVO">>,<<"_http._tcp.">>,<<"local.">>}}}
-ok
-```
+    3> flush().
+    Shell got {dnssd,#Ref<0.0.0.197>,
+                     {browse,add,
+                             {<<"dnsndnsweb">>,<<"_http._tcp.">>,
+                              <<"bonjour.tj.id.au.">>}}}
+    Shell got {dnssd,#Ref<0.0.0.197>,
+                     {browse,add,{<<"TIVO">>,<<"_http._tcp.">>,<<"local.">>}}}
+    ok
+
 Results will be sent in tuples of the form
 `{dnssd, Reference, {Operation, Change, Result}}`. Reference will be the same
 reference which was used to start the operation. Operation will be one of the
@@ -79,21 +74,19 @@ atoms `browse`, `resolve`, `register` or `enumerate`. Change will be the atom
 browse operation, it will be a tuple containing binaries of the form
 `{ServiceName, ServiceType, Domain}`.
 
-```
-4> dnssd:browse(<<"_http._tcp">>, <<"dns-sd.org">>).
-{ok,#Ref<0.0.0.488>}
-5> flush().
-Shell got {dnssd,#Ref<0.0.0.488>,
-                 {browse,add,
-                         {<<" * Apple, makers of the iPod">>,
-                          <<"_http._tcp.">>,<<"dns-sd.org.">>}}}
-Shell got {dnssd,#Ref<0.0.0.488>,
-                 {browse,add,
-                         {<<" * Google, searching the Web">>,
-                          <<"_http._tcp.">>,<<"dns-sd.org.">>}}}
-%% snipped %%
-ok
-```
+    4> dnssd:browse(<<"_http._tcp">>, <<"dns-sd.org">>).
+    {ok,#Ref<0.0.0.488>}
+    5> flush().
+    Shell got {dnssd,#Ref<0.0.0.488>,
+                     {browse,add,
+                             {<<" * Apple, makers of the iPod">>,
+                              <<"_http._tcp.">>,<<"dns-sd.org.">>}}}
+    Shell got {dnssd,#Ref<0.0.0.488>,
+                     {browse,add,
+                             {<<" * Google, searching the Web">>,
+                              <<"_http._tcp.">>,<<"dns-sd.org.">>}}}
+    %% snipped %%
+    ok
 
 Browsing can be limited to a specific domain by specifying the domain as
 argument two. Both domains and service types may be specified as lists or
@@ -101,21 +94,17 @@ binaries.
 
 ### Resolving a Service Instance
 
-```
-6> dnssd:resolve(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>). 
-{ok,#Ref<0.0.0.20357>}
-```
+    6> dnssd:resolve(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>). 
+    {ok,#Ref<0.0.0.20357>}
 
 To resolve a service, supply it's name, registration type and domain to the
 resolve function.
 
-```
-7> flush().
-Shell got {dnssd,#Ref<0.0.0.20357>,
-                 {resolve,{<<"dns-sd.org.">>,80,
-                           [{<<"txtvers">>,<<"1">>},{<<"path">>,<<"/">>}]}}}
-ok
-```
+    7> flush().
+    Shell got {dnssd,#Ref<0.0.0.20357>,
+                     {resolve,{<<"dns-sd.org.">>,80,
+                               [{<<"txtvers">>,<<"1">>},{<<"path">>,<<"/">>}]}}}
+    ok
 
 Unlike the other operations results won't be tagged add or remove as the
 underlying DNSSD API does not provide this information. As resolve is generally
@@ -126,10 +115,8 @@ and TxtStrings is a list containing either binaries or should a given string
 contain an equals sign, a `{Key, Value}` tuple wherein Key is everything up to
 the first equals sign and the remainder of the string is the value.
 
-```
-8> dnssd:resolve_sync(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>).
-{ok,{<<"dns-sd.org.">>,80,[<<"txtvers=1">>,<<"path=/">>]}}
-```
+    8> dnssd:resolve_sync(<<" * DNS Service Discovery">>, <<"_http._tcp.">>, <<"dns-sd.org.">>).
+    {ok,{<<"dns-sd.org.">>,80,[<<"txtvers=1">>,<<"path=/">>]}}
 
 A synchronous wrapper to resolve is also provided. A timeout in milliseconds can
 also be specified by adding a fourth argument. The default timeout is 5 seconds.
@@ -137,15 +124,14 @@ also be specified by adding a fourth argument. The default timeout is 5 seconds.
 
 ### Registering Services
 
-```
-9> dnssd:register("_answer._udp",42).
-{ok,#Ref<0.0.0.10006>}
-10> flush().
-Shell got {dnssd,#Ref<0.0.0.10006>,
-                 {register,add,
-                           {<<"atj-mbp">>,<<"_answer._udp.">>,<<"local.">>}}}
-ok
-```
+    9> dnssd:register("_answer._udp",42).
+    {ok,#Ref<0.0.0.10006>}
+    10> flush().
+    Shell got {dnssd,#Ref<0.0.0.10006>,
+                     {register,add,
+                               {<<"atj-mbp">>,<<"_answer._udp.">>,<<"local.">>}}}
+    ok
+
 The minimum arguments needed to register a service are the service type and
 port. If no service name is supplied, the machines name is used (in the example
 above, that's `<<"atj-mbp">>`). The Result term for this operation is a tuple
@@ -153,12 +139,11 @@ containing binaries of the form `{ServiceName, ServiceType, Domain}`.
 
 For brevity, the alternative invocations of register are:
 
-```
-dnssd:register(Name, Type, Port).
-dnssd:register(Type, Port, Txt).
-dnssd:register(Name, Type, Port, Txt).
-dnssd:register(Name, Type, Port, Txt, Host, Domain).
-```
+    dnssd:register(Name, Type, Port).
+    dnssd:register(Type, Port, Txt).
+    dnssd:register(Name, Type, Port, Txt).
+    dnssd:register(Name, Type, Port, Txt, Host, Domain).
+
 Wherein:
 
  * `Txt` is a TXT record data in either binary form (a sequence of
@@ -180,20 +165,18 @@ on the local machine.
 
 ### Enumerating Domains
 
-```
-11> dnssd:enumerate(browse).
-{ok,#Ref<0.0.0.15448>}
-12> flush().
-Shell got {dnssd,#Ref<0.0.0.15448>,{enumerate,add,<<"local.">>}}
-Shell got {dnssd,#Ref<0.0.0.15448>,{enumerate,add,<<"bonjour.tj.id.au.">>}}
-ok
-13> dnssd:enumerate(reg).
-{ok,#Ref<0.0.0.15529>}
-14> flush().
-Shell got {dnssd,#Ref<0.0.0.15529>,{enumerate,add,<<"local.">>}}
-Shell got {dnssd,#Ref<0.0.0.15529>,{enumerate,add,<<"bonjour.tj.id.au.">>}}
-ok
-```
+    11> dnssd:enumerate(browse).
+    {ok,#Ref<0.0.0.15448>}
+    12> flush().
+    Shell got {dnssd,#Ref<0.0.0.15448>,{enumerate,add,<<"local.">>}}
+    Shell got {dnssd,#Ref<0.0.0.15448>,{enumerate,add,<<"bonjour.tj.id.au.">>}}
+    ok
+    13> dnssd:enumerate(reg).
+    {ok,#Ref<0.0.0.15529>}
+    14> flush().
+    Shell got {dnssd,#Ref<0.0.0.15529>,{enumerate,add,<<"local.">>}}
+    Shell got {dnssd,#Ref<0.0.0.15529>,{enumerate,add,<<"bonjour.tj.id.au.">>}}
+    ok
 
 The Result term for this operation is a binary containing the browse or
 registration domain.
