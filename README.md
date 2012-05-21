@@ -46,7 +46,7 @@ Please direct your [feedback here](http://andrew.tj.id.au/email).
     1> dnssd:start().
     ok
 
-First start the application via dnssd:start/1 or application:start(dnssd).
+First start the application via `dnssd:start/1` or `application:start(dnssd)`.
 
 ### Browsing for Services
 
@@ -54,8 +54,8 @@ First start the application via dnssd:start/1 or application:start(dnssd).
     {ok,#Ref<0.0.0.197>}
 
 In the success case, all functions return a tuple of the form `{ok, Reference}`.
-Reference should be retained to pass to dnssd:stop/1 when no further results are
-required.
+Reference should be retained to pass to `dnssd:stop/1` when no further results
+are required.
 
     3> flush().
     Shell got {dnssd,#Ref<0.0.0.197>,
@@ -154,7 +154,7 @@ string or binary for the local machine.
  * `Domain` is the domain to register the service within. Pass an empty string
 or binary for all domains.
 
-'''Note:''' A service may be renamed if it conflicts with another service. Check
+***Note:*** A service may be renamed if it conflicts with another service. Check
 the Results tuple to determine what name a service has been assigned.
 
 #### Local Registrations
@@ -185,11 +185,11 @@ registration domain.
 
 It's important to stop operations when no more results are needed to avoid
 generating needless network traffic. To stop an operation pass the Reference
-returned when you started the operation to dnssd:stop/1. Operations will also be
-stopped if your process exits.
+returned when you started the operation to `dnssd:stop/1`. Operations will also
+be stopped if your process exits.
 
 ### Retrieving Results
 
-Results from a running operation can be retrieved by calling dnssd:results(Ref).
-For resolve operations this will only return the last result. For all other
-operations it will return all current results.
+Results from a running operation can be retrieved by calling
+`dnssd:results(Ref)`. For resolve operations this will only return the last
+result. For all other operations it will return all current results.
