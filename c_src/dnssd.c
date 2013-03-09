@@ -425,7 +425,7 @@ static void ready_io(ErlDrvData edd, ErlDrvEvent ev)
 			     ERL_DRV_ATOM, dd->term_error,
 			     ERL_DRV_INT, err,
 			     ERL_DRV_TUPLE, 3};
-    driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
+    erl_drv_output_term(driver_mk_port(dd->erl_port), spec, sizeof(spec) / sizeof(spec[0]));
   }
 }
 
@@ -446,7 +446,7 @@ static void DNSSD_API EnumReply(DNSServiceRef sd_ref,
 			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) domain, strlen(domain),
 			     ERL_DRV_TUPLE, 2,
 			     ERL_DRV_TUPLE, 3};
-    driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
+    erl_drv_output_term(driver_mk_port(dd->erl_port), spec, sizeof(spec) / sizeof(spec[0]));
   }
 }
 
@@ -473,7 +473,7 @@ static void DNSSD_API BrowseReply(DNSServiceRef sd_ref,
 			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) domain, strlen(domain),
 			     ERL_DRV_TUPLE, 5,
 			     ERL_DRV_TUPLE, 3};
-    driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
+    erl_drv_output_term(driver_mk_port(dd->erl_port), spec, sizeof(spec) / sizeof(spec[0]));
   }
 }
 
@@ -502,7 +502,7 @@ static void DNSSD_API ResolveReply(DNSServiceRef sd_ref,
 			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) txtRecord, txtLen,
 			     ERL_DRV_TUPLE, 6,
 			     ERL_DRV_TUPLE, 3};
-    driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
+    erl_drv_output_term(driver_mk_port(dd->erl_port), spec, sizeof(spec) / sizeof(spec[0]));
   }
 }
 
@@ -526,7 +526,7 @@ static void DNSSD_API RegisterReply (DNSServiceRef sd_ref,
 			     ERL_DRV_BUF2BINARY, (ErlDrvTermData) domain, strlen(domain),
 			     ERL_DRV_TUPLE, 4,
 			     ERL_DRV_TUPLE, 3};
-    driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
+    erl_drv_output_term(driver_mk_port(dd->erl_port), spec, sizeof(spec) / sizeof(spec[0]));
   }
 }
 
@@ -536,5 +536,5 @@ void send_error(ErlDrvData edd, DNSServiceErrorType err) {
 			   ERL_DRV_ATOM, dd->term_error,
 			   ERL_DRV_INT, (ErlDrvTermData) errno,
 			   ERL_DRV_TUPLE, 3};
-  driver_output_term(dd->erl_port, spec, sizeof(spec) / sizeof(spec[0]));
+  erl_drv_output_term(driver_mk_port(dd->erl_port), spec, sizeof(spec) / sizeof(spec[0]));
 }
