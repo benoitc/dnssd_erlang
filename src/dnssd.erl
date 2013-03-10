@@ -69,7 +69,7 @@
 -type result_message() :: {dnssd, op_ref(), result()}.
 
 -export_type([domain_type/0, domain/0, name/0, type/0, hostname/0, ip_port/0,
-	      txt_strings/0, txt_string/0, result/0, result_message/0,
+	      txt_strings/0, txt_string/0, op_ref/0, result/0, result_message/0,
 	      enumerate_result/0, browse_result/0, resolve_result/0,
 	      register_result/0]).
 
