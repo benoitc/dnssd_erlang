@@ -14,6 +14,8 @@ down before release 1.0.
 
 ### Prerequisites
 
+Erlang R16A or later. For compatibility with older Erlang releases use dnssd_erlang v0.8.
+
 Apple Bonjour or a compatible API such as [Avahi](http://avahi.org/) with it's
 compatibility layer along with the appropriate development files:
 
