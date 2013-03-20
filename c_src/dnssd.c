@@ -27,11 +27,6 @@
 #include <string.h>
 #include <dns_sd.h>
 
-#if ERL_DRV_EXTENDED_MAJOR_VERSION < 2
-#define ErlDrvSizeT int
-#define ErlDrvSSizeT int
-#endif
-
 #define DNSSD_CMD_ENUM     0
 #define DNSSD_CMD_BROWSE   1
 #define DNSSD_CMD_RESOLVE  2
