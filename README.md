@@ -1,3 +1,10 @@
+
+# NEW MAINTAINER NEEDED
+
+Please get in touch if you'd like to take this project on.
+
+---
+
 #dnssd_erlang
 
 dnssd_erlang is an interface to Apple's Bonjour DNS Service Discovery
@@ -6,11 +13,6 @@ network services via link-local multicast DNS on the local network and via
 unicast DNS over the internet. In the later case if the service is running
 behind a NAT gateway Bonjour will only advertise it if a port forward can be
 negotiated via NAT-PMP or uPNP (which is attempted automatically).
-
-### Development Status
-
-The API and functionality provided aren't yet set in stone but will be locked
-down before release 1.0.
 
 ### Prerequisites
 
@@ -37,10 +39,6 @@ it may be that avahi-daemon is not running.
 
 If you are running Windows you will need Visual Studio and the Bonjour SDK
 installed. The project can then be built from a Visual Studio command prompt.
-
-### Feedback
-
-Please direct your [feedback here](http://andrew.tj.id.au/email).
 
 ### Example use
 
