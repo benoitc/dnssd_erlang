@@ -1,10 +1,3 @@
-
-# NEW MAINTAINER NEEDED
-
-Please get in touch if you'd like to take this project on.
-
----
-
 #dnssd_erlang
 
 dnssd_erlang is an interface to Apple's Bonjour DNS Service Discovery
