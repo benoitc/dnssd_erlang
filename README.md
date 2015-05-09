@@ -17,6 +17,7 @@ compatibility layer along with the appropriate development files:
 * OS X - bundled
 * Windows - [Bonjour SDK](http://developer.apple.com/opensource/)
 * BSD/Linux - search for Avahi in your operating systems software manager
+* Ubuntu - apt-get install avahi-daemon libavahi-compat-libdnssd-dev
 
 ### Build Process
 
