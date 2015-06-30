@@ -11,3 +11,4 @@
 doc/
 deps/
 .eunit/
+_build
