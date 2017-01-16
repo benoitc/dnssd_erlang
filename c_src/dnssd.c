@@ -203,7 +203,7 @@ static ErlDrvSSizeT call(ErlDrvData edd, unsigned int cmd, char *buf,
       goto badarg;
     }
   } else if (cmd == DNSSD_CMD_BROWSE) {
-    if (!arg.ei_type == ERL_TUPLE || arg.arity != 2) goto badarg;
+    if (arg.ei_type != ERL_SMALL_TUPLE_EXT || arg.arity != 2) goto badarg;
     /* decode type */
     ei_decode_ei_term(buf, &index, &type);
     if (type.ei_type != ERL_BINARY_EXT) goto badarg;
@@ -232,7 +232,7 @@ static ErlDrvSSizeT call(ErlDrvData edd, unsigned int cmd, char *buf,
     driver_free(type_tmp);
     driver_free(domain_tmp);
   } else if (cmd == DNSSD_CMD_RESOLVE) {
-    if (!arg.ei_type == ERL_TUPLE || arg.arity != 3) goto badarg;
+    if (arg.ei_type != ERL_SMALL_TUPLE_EXT || arg.arity != 3) goto badarg;
     /* decode name */
     ei_decode_ei_term(buf, &index, &name);
     if (name.ei_type != ERL_BINARY_EXT) goto badarg;
@@ -276,7 +276,7 @@ static ErlDrvSSizeT call(ErlDrvData edd, unsigned int cmd, char *buf,
     driver_free(type_tmp);
     driver_free(domain_tmp);
   } else if (cmd == DNSSD_CMD_REGISTER) {
-    if (!arg.ei_type == ERL_TUPLE || arg.arity != 6) goto badarg;
+    if (arg.ei_type != ERL_SMALL_TUPLE_EXT || arg.arity != 6) goto badarg;
     /* decode name */
     ei_decode_ei_term(buf, &index, &name);
     if (name.ei_type != ERL_BINARY_EXT) goto badarg;
